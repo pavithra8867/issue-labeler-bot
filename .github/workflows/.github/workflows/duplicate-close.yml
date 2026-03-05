@@ -1,0 +1,31 @@
+name: Close Duplicate Issues
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  close-duplicate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close duplicate issues
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const title = context.payload.issue.title.toLowerCase();
+
+            if (title.includes("duplicate")) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                state: "closed"
+              });
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: "This issue was automatically closed because it was marked as duplicate."
+              });
+            }
